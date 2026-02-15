@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Region extends Model
 {
-    protected $fillable = ['layout_id', 'name', 'width', 'height', 'top', 'left', 'z_index', 'playlist_id', 'content_id'];
+    protected $fillable = ['layout_id', 'name', 'width', 'height', 'top', 'left', 'z_index', 'playlist_id', 'content_id', 'widget_type', 'widget_config'];
+
+    protected $casts = [
+        'widget_config' => 'array',
+    ];
 
     public function layout()
     {

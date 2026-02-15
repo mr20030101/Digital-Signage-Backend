@@ -27,6 +27,8 @@ class RegionController extends Controller
             'z_index' => 'required|integer',
             'playlist_id' => 'nullable|exists:playlists,id',
             'content_id' => 'nullable|exists:contents,id',
+            'widget_type' => 'nullable|string|max:50',
+            'widget_config' => 'nullable|array',
         ]);
 
         // Verify the layout belongs to the user (unless superadmin)
@@ -73,6 +75,8 @@ class RegionController extends Controller
             'z_index' => 'sometimes|integer',
             'playlist_id' => 'nullable|exists:playlists,id',
             'content_id' => 'nullable|exists:contents,id',
+            'widget_type' => 'nullable|string|max:50',
+            'widget_config' => 'nullable|array',
         ]);
 
         $region->update($validated);
