@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
-    protected $fillable = ['display_id', 'playlist_id', 'start_time', 'end_time', 'days_of_week', 'is_active'];
+    protected $fillable = ['display_id', 'playlist_id', 'layout_id', 'start_time', 'end_time', 'days_of_week', 'is_active'];
 
     protected $casts = [
         'start_time' => 'datetime',
@@ -23,5 +23,10 @@ class Schedule extends Model
     public function playlist()
     {
         return $this->belongsTo(Playlist::class);
+    }
+
+    public function layout()
+    {
+        return $this->belongsTo(Layout::class);
     }
 }

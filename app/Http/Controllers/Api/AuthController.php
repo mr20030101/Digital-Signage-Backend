@@ -46,6 +46,45 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'timezone' => 'sometimes|string|timezone',
+            'password' => 'nullable|min:6|confirmed',
+        ]);
+
+        // Only update password if provided
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'user' => $user,
+            'message' => 'Profile updated successfully'
+        ]);
+    }
+
+    public function regeneratePlayerToken(Request $request)
+    {
+        $user = $request->user();
+        
+        $newToken = base64_encode(\Illuminate\Support\Str::random(64));
+        $user->update(['player_token' => $newToken]);
+
+        return response()->json([
+            'token' => $newToken,
+            'message' => 'Player token regenerated successfully. Update all your players with this new token.'
+        ]);
+    }
+
     public function register(Request $request)
     {
         $validated = $request->validate([

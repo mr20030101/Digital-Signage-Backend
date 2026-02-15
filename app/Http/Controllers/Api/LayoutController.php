@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 
 class LayoutController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $layouts = \App\Models\Layout::with('regions')->get();
+        $user = $request->user();
+        
+        // Superadmin sees all layouts, regular users see only their own
+        if ($user->isSuperAdmin()) {
+            $layouts = \App\Models\Layout::with('regions')->get();
+        } else {
+            $layouts = \App\Models\Layout::where('user_id', $user->id)->with('regions')->get();
+        }
+        
         return response()->json($layouts);
     }
 
@@ -26,21 +34,34 @@ class LayoutController extends Controller
 
         $layout = \App\Models\Layout::create([
             ...$validated,
-            'user_id' => 1,
+            'user_id' => $request->user()->id,
         ]);
 
         return response()->json($layout, 201);
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
+        $user = $request->user();
         $layout = \App\Models\Layout::with('regions')->findOrFail($id);
+        
+        // Check ownership for regular users
+        if (!$user->isSuperAdmin() && $layout->user_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        
         return response()->json($layout);
     }
 
     public function update(Request $request, string $id)
     {
+        $user = $request->user();
         $layout = \App\Models\Layout::findOrFail($id);
+        
+        // Check ownership for regular users
+        if (!$user->isSuperAdmin() && $layout->user_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -55,9 +76,16 @@ class LayoutController extends Controller
         return response()->json($layout);
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
+        $user = $request->user();
         $layout = \App\Models\Layout::findOrFail($id);
+        
+        // Check ownership for regular users
+        if (!$user->isSuperAdmin() && $layout->user_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        
         $layout->delete();
         return response()->json(null, 204);
     }
